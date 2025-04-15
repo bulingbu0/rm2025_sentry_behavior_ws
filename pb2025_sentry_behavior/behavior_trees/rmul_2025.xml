@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="is_attacked">
+    <ReactiveFallback>
+      <Inverter>
+        <IsAttacked key_port="{@referee_robotStatus}"/>
+      </Inverter>
+      <PubSpinFlag spin_flag="3"
+                   topic_name="spin_flag"/>
+    </ReactiveFallback>
+  </BehaviorTree>
+
+  <BehaviorTree ID="rmul_2025">
+    <WhileDoElse>
+      <IsGameStatus max_remain_time="420"
+                    min_remain_time="0"
+                    game_progress="4"
+                    key_port="{@referee_gameStatus}"/>
+      <WhileDoElse>
+        <IsStatusOK ammo_min="0"
+                    heat_max="350"
+                    hp_min="160"
+                    key_port="{@referee_robotStatus}"/>
+        <ReactiveSequence>
+          <WhileDoElse>
+            <IsReachGoal current_pose="{@current_pose}"
+                         threshold="1.0"/>
+            <PubSpinFlag spin_flag="3"
+                         topic_name="spin_flag"/>
+            <PubNav2Goal goal="4.73;-1.78;0"
+                         topic_name="goal_pose"/>
+          </WhileDoElse>
+          <SubTree ID="is_attacked"/>
+        </ReactiveSequence>
+        <ReactiveSequence>
+          <PubSpinFlag spin_flag="1"
+                       topic_name="spin_flag"/>
+          <PubNav2Goal goal="0;0;0"
+                       topic_name="goal_pose"/>
+        </ReactiveSequence>
+      </WhileDoElse>
+      <RateController hz="1">
+        <PubNav2Goal goal="0;0;0"
+                     topic_name="goal_pose"/>
+      </RateController>
+    </WhileDoElse>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Condition ID="IsAttacked">
+      <input_port name="key_port"
+                  default="{@referee_robotStatus}"/>
+    </Condition>
+    <Condition ID="IsGameStatus">
+      <input_port name="max_remain_time"
+                  default="420"
+                  type="int">Maximum remaining time (s)</input_port>
+      <input_port name="min_remain_time"
+                  default="0"
+                  type="int">Minimum remaining time (s)</input_port>
+      <input_port name="game_progress"
+                  default="4"
+                  type="int">Expected game progress stage</input_port>
+      <input_port name="key_port"
+                  default="{@referee_gameStatus}"
+                  type="pb_rm_interfaces::msg::GameStatus_&lt;std::allocator&lt;void&gt; &gt;">GameStatus port on blackboard</input_port>
+    </Condition>
+    <Condition ID="IsReachGoal"
+               editable="true">
+      <input_port name="current_pose"
+                  default="{@current_pose}"/>
+      <input_port name="threshold"
+                  default="0.2"/>
+    </Condition>
+    <Condition ID="IsStatusOK">
+      <input_port name="ammo_min"
+                  default="0"
+                  type="int">Lower then minimum ammo will return FAILURE</input_port>
+      <input_port name="heat_max"
+                  default="350"
+                  type="int">Maximum heat. NOTE: Sentry heat limit is 400</input_port>
+      <input_port name="hp_min"
+                  default="300"
+                  type="int">Minimum HP. NOTE: Sentry init/max HP is 400</input_port>
+      <input_port name="key_port"
+                  default="{@referee_robotStatus}"
+                  type="pb_rm_interfaces::msg::RobotStatus_&lt;std::allocator&lt;void&gt; &gt;">RobotStatus port on blackboard</input_port>
+    </Condition>
+    <Condition ID="PubNav2Goal">
+      <input_port name="goal"
+                  default="0;0;0"
+                  type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;">Expected goal pose that send to nav2. Fill with format `x;y;yaw`</input_port>
+      <input_port name="topic_name"
+                  default="__default__placeholder__"
+                  type="std::string">Topic name</input_port>
+    </Condition>
+    <Action ID="PubSpinFlag"
+            editable="true">
+      <input_port name="spin_flag"
+                  default="true">spin_flag</input_port>
+      <input_port name="topic_name"
+                  default="spin">Topic name</input_port>
+    </Action>
+    <Decorator ID="RateController">
+      <input_port name="hz"
+                  default="10.000000"
+                  type="double">Rate</input_port>
+    </Decorator>
+  </TreeNodesModel>
+
+</root>

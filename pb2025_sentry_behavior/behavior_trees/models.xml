@@ -1,0 +1,78 @@
+<root BTCPP_format="4">
+    <TreeNodesModel>
+        <Condition ID="CalculateAttackPose">
+            <input_port name="costmap_port" type="nav_msgs::msg::OccupancyGrid_&lt;std::allocator&lt;void&gt; &gt;" default="{@nav_globalCostmap}">GlobalCostmap port on blackboard</input_port>
+            <input_port name="tracker_port" type="auto_aim_interfaces::msg::Target_&lt;std::allocator&lt;void&gt; &gt;" default="{@tracker_target}">Vision target port on blackboard</input_port>
+            <output_port name="goal" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;" default="{attack_pose}">Expected goal pose that send to nav2. Fill with format `x;y;yaw`</output_port>
+            <input_port name="topic_name" type="std::string" default="__default__placeholder__">Topic name</input_port>
+        </Condition>
+        <Condition ID="IsAttacked">
+            <input_port name="key_port" type="pb_rm_interfaces::msg::RobotStatus_&lt;std::allocator&lt;void&gt; &gt;" default="{@referee_robotStatus}">RobotStatus BlackBoard port</input_port>
+        </Condition>
+        <Condition ID="IsDetectEnemy">
+            <input_port name="tracking" type="bool" default="false">is detect enemy</input_port>
+            <input_port name="key_port" type="auto_aim_interfaces::msg::Target_&lt;std::allocator&lt;void&gt; &gt;" default="{@tracker_target}">Vision tracking port on blackboard</input_port>
+        </Condition>
+        <Condition ID="IsGameStatus">
+            <input_port name="max_remain_time" type="int" default="420">Maximum remaining time (s)</input_port>
+            <input_port name="min_remain_time" type="int" default="0">Minimum remaining time (s)</input_port>
+            <input_port name="game_progress" type="int" default="4">Expected game progress stage</input_port>
+            <input_port name="key_port" type="pb_rm_interfaces::msg::GameStatus_&lt;std::allocator&lt;void&gt; &gt;" default="{@referee_gameStatus}">GameStatus port on blackboard</input_port>
+        </Condition>
+        <Condition ID="IsReachGoal">
+            <input_port name="threshold" type="double" default="0.2">Threshold</input_port>
+            <input_port name="current_pose" type="nav_msgs::msg::Odometry_&lt;std::allocator&lt;void&gt; &gt;" default="{@current_pose}">Current pose BlackBoard port</input_port>
+        </Condition>
+        <Condition ID="IsRfidDetected">
+            <input_port name="friendly_supply_zone_exchange" type="bool" default="false">己方与兑换区重叠的补给区</input_port>
+            <input_port name="friendly_supply_zone_non_exchange" type="bool" default="false">己方与兑换区不重叠的补给区 / RMUL 补给区</input_port>
+            <input_port name="center_gain_point" type="bool" default="false">中心增益点（仅 RMUL 适用）</input_port>
+            <input_port name="friendly_fortress_gain_point" type="bool" default="false">己方堡垒增益点</input_port>
+            <input_port name="key_port" type="pb_rm_interfaces::msg::RfidStatus_&lt;std::allocator&lt;void&gt; &gt;" default="{@referee_rfidStatus}">RfidStatus port on blackboard</input_port>
+        </Condition>
+        <Condition ID="IsStatusOK">
+            <input_port name="ammo_min" type="int" default="0">Lower then minimum ammo will return FAILURE</input_port>
+            <input_port name="heat_max" type="int" default="350">Maximum heat. NOTE: Sentry heat limit is 400</input_port>
+            <input_port name="hp_min" type="int" default="300">Minimum HP. NOTE: Sentry init/max HP is 400</input_port>
+            <input_port name="key_port" type="pb_rm_interfaces::msg::RobotStatus_&lt;std::allocator&lt;void&gt; &gt;" default="{@referee_robotStatus}">RobotStatus port on blackboard</input_port>
+        </Condition>
+        <Condition ID="PubIsReachGoal">
+            <input_port name="topic_name" type="std::string" default="is_reach_goal">is_reach_goal topic name</input_port>
+            <input_port name="is_reach_goal" type="bool" default="true">Is reach goal</input_port>
+        </Condition>
+        <Action ID="PubJointState">
+            <input_port name="gimbal_pitch" type="float" default="{gimbal_pitch}">Expected Pitch angle (rad) of the gimbal</input_port>
+            <input_port name="gimbal_yaw" type="float" default="{gimbal_yaw}">Expected Yaw angle (rad) of the gimbal</input_port>
+            <input_port name="duration" type="std::chrono::milliseconds" default="">Publish then sleep duration in milliseconds</input_port>
+            <input_port name="topic_name" type="std::string" default="__default__placeholder__">Topic name</input_port>
+        </Action>
+        <Condition ID="PubNav2Goal">
+            <input_port name="goal" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;" default="0;0;0">Expected goal pose that send to nav2. Fill with format `x;y;yaw`</input_port>
+            <input_port name="topic_name" type="std::string" default="__default__placeholder__">Topic name</input_port>
+        </Condition>
+        <Condition ID="PubSpinFlag">
+            <input_port name="topic_name" type="std::string" default="spin_flag">spin_flag topic name</input_port>
+            <input_port name="spin_flag" type="unsigned char" default="0">Spin flag</input_port>
+        </Condition>
+        <Action ID="PublishTwist">
+            <input_port name="v_y" type="double" default="0.000000">Linear Y velocity (m/s)</input_port>
+            <input_port name="v_yaw" type="double" default="0.000000">Angular Z velocity (rad/s)</input_port>
+            <input_port name="v_x" type="double" default="0.000000">Linear X velocity (m/s)</input_port>
+            <input_port name="duration" type="std::chrono::milliseconds" default="">Publish then sleep duration in milliseconds</input_port>
+            <input_port name="topic_name" type="std::string" default="__default__placeholder__">Topic name</input_port>
+        </Action>
+        <Decorator ID="RateController">
+            <input_port name="hz" type="double" default="10.000000">Rate</input_port>
+        </Decorator>
+        <Control ID="RecoveryNode">
+            <input_port name="num_attempts" type="int" default="999">Number of retries</input_port>
+        </Control>
+        <Action ID="SendNav2Goal">
+            <input_port name="goal" type="geometry_msgs::msg::PoseStamped_&lt;std::allocator&lt;void&gt; &gt;" default="0;0;0">Expected goal pose that send to nav2. Fill with format `x;y;yaw`</input_port>
+            <input_port name="action_name" type="std::string" default="">Action server name</input_port>
+        </Action>
+        <Decorator ID="TickAfterTimeout">
+            <input_port name="timeout" type="float">time in s to wait before ticking child again</input_port>
+        </Decorator>
+    </TreeNodesModel>
+</root>
